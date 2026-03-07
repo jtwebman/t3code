@@ -171,6 +171,7 @@ interface StagePackageJson {
   readonly t3codeCommitHash: string;
   readonly private: true;
   readonly description: string;
+  readonly homepage: string;
   readonly author: string;
   readonly main: string;
   readonly build: Record<string, unknown>;
@@ -333,7 +334,9 @@ function stageMacIcons(stageResourcesDir: string, verbose: boolean) {
   });
 }
 
-function stageLinuxIcons(stageResourcesDir: string) {
+const LINUX_ICON_SIZES = [16, 24, 32, 48, 64, 128, 256, 512] as const;
+
+function stageLinuxIcons(stageResourcesDir: string, verbose: boolean) {
   return Effect.gen(function* () {
     const fs = yield* FileSystem.FileSystem;
     const path = yield* Path.Path;
@@ -346,6 +349,18 @@ function stageLinuxIcons(stageResourcesDir: string) {
 
     const iconPath = path.join(stageResourcesDir, "icon.png");
     yield* fs.copyFile(iconSource, iconPath);
+
+    // Generate sized icons at build time so electron-builder includes all sizes
+    // in the hicolor icon theme. Files must be named <size>.png (e.g. 48x48.png).
+    for (const size of LINUX_ICON_SIZES) {
+      const name = `${size}x${size}`;
+      const dest = path.join(stageResourcesDir, `${name}.png`);
+      yield* runCommand(
+        ChildProcess.make({
+          ...commandOutputOptions(verbose),
+        })`convert ${iconSource} -resize ${size}x${size} ${dest}`,
+      );
+    }
   });
 }
 
@@ -455,6 +470,9 @@ const createBuildConfig = Effect.fn("createBuildConfig")(function* (
     directories: {
       buildResources: "apps/desktop/resources",
     },
+    extraResources: [
+      { from: "apps/desktop/resources/icon.png", to: "icon.png" },
+    ],
   };
   const publishConfig = resolveGitHubPublishConfig();
   if (publishConfig) {
@@ -472,9 +490,21 @@ const createBuildConfig = Effect.fn("createBuildConfig")(function* (
   if (platform === "linux") {
     buildConfig.linux = {
       target: [target],
-      icon: "icon.png",
+      icon: "apps/desktop/resources",
       category: "Development",
+      executableName: "t3-code-desktop",
+      executableArgs: [
+        "--enable-features=UseOzonePlatform,WaylandWindowDecorations",
+        "--ozone-platform-hint=auto",
+        "--gtk-version=4",
+      ],
     };
+    if (target === "deb") {
+      buildConfig.deb = {
+        afterInstall: "apps/desktop/resources/linux/after-install.sh",
+        afterRemove: "apps/desktop/resources/linux/after-remove.sh",
+      };
+    }
   }
 
   if (platform === "win") {
@@ -502,7 +532,7 @@ const assertPlatformBuildResources = Effect.fn("assertPlatformBuildResources")(f
   }
 
   if (platform === "linux") {
-    yield* stageLinuxIcons(stageResourcesDir);
+    yield* stageLinuxIcons(stageResourcesDir, verbose);
     return;
   }
 
@@ -624,7 +654,8 @@ const buildDesktopArtifact = Effect.fn("buildDesktopArtifact")(function* (
     t3codeCommitHash: commitHash,
     private: true,
     description: "T3 Code desktop build",
-    author: "T3 Tools",
+    homepage: "https://t3.codes/",
+    author: "T3 Tools <noreply@t3.codes>",
     main: "apps/desktop/dist-electron/main.js",
     build: yield* createBuildConfig(
       options.platform,

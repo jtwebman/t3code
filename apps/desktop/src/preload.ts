@@ -11,6 +11,9 @@ const UPDATE_STATE_CHANNEL = "desktop:update-state";
 const UPDATE_GET_STATE_CHANNEL = "desktop:update-get-state";
 const UPDATE_DOWNLOAD_CHANNEL = "desktop:update-download";
 const UPDATE_INSTALL_CHANNEL = "desktop:update-install";
+const WINDOW_MINIMIZE_CHANNEL = "desktop:window-minimize";
+const WINDOW_MAXIMIZE_CHANNEL = "desktop:window-maximize";
+const WINDOW_CLOSE_CHANNEL = "desktop:window-close";
 const wsUrl = process.env.T3CODE_DESKTOP_WS_URL ?? null;
 
 contextBridge.exposeInMainWorld("desktopBridge", {
@@ -45,4 +48,7 @@ contextBridge.exposeInMainWorld("desktopBridge", {
       ipcRenderer.removeListener(UPDATE_STATE_CHANNEL, wrappedListener);
     };
   },
+  windowMinimize: () => ipcRenderer.send(WINDOW_MINIMIZE_CHANNEL),
+  windowMaximize: () => ipcRenderer.send(WINDOW_MAXIMIZE_CHANNEL),
+  windowClose: () => ipcRenderer.send(WINDOW_CLOSE_CHANNEL),
 } satisfies DesktopBridge);

@@ -14,6 +14,7 @@ import {
   nativeTheme,
   protocol,
   shell,
+  type TitleBarOverlay,
 } from "electron";
 import type { MenuItemConstructorOptions } from "electron";
 import * as Effect from "effect/Effect";
@@ -55,6 +56,9 @@ const MENU_ACTION_CHANNEL = "desktop:menu-action";
 const UPDATE_STATE_CHANNEL = "desktop:update-state";
 const UPDATE_GET_STATE_CHANNEL = "desktop:update-get-state";
 const UPDATE_DOWNLOAD_CHANNEL = "desktop:update-download";
+const WINDOW_MINIMIZE_CHANNEL = "desktop:window-minimize";
+const WINDOW_MAXIMIZE_CHANNEL = "desktop:window-maximize";
+const WINDOW_CLOSE_CHANNEL = "desktop:window-close";
 const UPDATE_INSTALL_CHANNEL = "desktop:update-install";
 const STATE_DIR =
   process.env.T3CODE_STATE_DIR?.trim() || Path.join(OS.homedir(), ".t3", "userdata");
@@ -1211,6 +1215,35 @@ function registerIpcHandlers(): void {
       state: updateState,
     } satisfies DesktopUpdateActionResult;
   });
+
+  ipcMain.removeAllListeners(WINDOW_MINIMIZE_CHANNEL);
+  ipcMain.on(WINDOW_MINIMIZE_CHANNEL, (event) => {
+    BrowserWindow.fromWebContents(event.sender)?.minimize();
+  });
+
+  ipcMain.removeAllListeners(WINDOW_MAXIMIZE_CHANNEL);
+  ipcMain.on(WINDOW_MAXIMIZE_CHANNEL, (event) => {
+    const win = BrowserWindow.fromWebContents(event.sender);
+    if (win?.isMaximized()) {
+      win.unmaximize();
+    } else {
+      win?.maximize();
+    }
+  });
+
+  ipcMain.removeAllListeners(WINDOW_CLOSE_CHANNEL);
+  ipcMain.on(WINDOW_CLOSE_CHANNEL, (event) => {
+    BrowserWindow.fromWebContents(event.sender)?.close();
+  });
+}
+
+function titleBarOverlayColors(): TitleBarOverlay {
+  const dark = nativeTheme.shouldUseDarkColors;
+  return {
+    color: dark ? "#09090b" : "#ffffff",
+    symbolColor: dark ? "#a1a1aa" : "#09090b",
+    height: 36,
+  };
 }
 
 function getIconOption(): { icon: string } | Record<string, never> {
@@ -1230,8 +1263,10 @@ function createWindow(): BrowserWindow {
     autoHideMenuBar: true,
     ...getIconOption(),
     title: APP_DISPLAY_NAME,
-    titleBarStyle: "hiddenInset",
-    trafficLightPosition: { x: 16, y: 18 },
+    darkTheme: nativeTheme.shouldUseDarkColors,
+    ...(process.platform === "darwin"
+      ? { titleBarStyle: "hiddenInset" as const, trafficLightPosition: { x: 16, y: 18 } }
+      : { titleBarStyle: "hidden" as const, titleBarOverlay: titleBarOverlayColors() }),
     webPreferences: {
       preload: Path.join(__dirname, "preload.js"),
       contextIsolation: true,
@@ -1287,6 +1322,14 @@ function createWindow(): BrowserWindow {
   window.once("ready-to-show", () => {
     window.show();
   });
+
+  if (process.platform !== "darwin") {
+    nativeTheme.on("updated", () => {
+      if (!window.isDestroyed()) {
+        window.setTitleBarOverlay(titleBarOverlayColors());
+      }
+    });
+  }
 
   if (isDevelopment) {
     void window.loadURL(process.env.VITE_DEV_SERVER_URL as string);

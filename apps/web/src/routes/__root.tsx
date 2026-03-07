@@ -325,3 +325,4 @@ function DesktopProjectBootstrap() {
   // Desktop hydration runs through EventRouter project + orchestration sync.
   return null;
 }
+

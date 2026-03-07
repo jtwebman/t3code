@@ -109,6 +109,9 @@ export interface DesktopBridge {
   downloadUpdate: () => Promise<DesktopUpdateActionResult>;
   installUpdate: () => Promise<DesktopUpdateActionResult>;
   onUpdateState: (listener: (state: DesktopUpdateState) => void) => () => void;
+  windowMinimize: () => void;
+  windowMaximize: () => void;
+  windowClose: () => void;
 }
 
 export interface NativeApi {
