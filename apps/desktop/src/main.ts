@@ -1323,14 +1323,6 @@ function createWindow(): BrowserWindow {
     window.show();
   });
 
-  if (process.platform !== "darwin") {
-    nativeTheme.on("updated", () => {
-      if (!window.isDestroyed()) {
-        window.setTitleBarOverlay(titleBarOverlayColors());
-      }
-    });
-  }
-
   if (isDevelopment) {
     void window.loadURL(process.env.VITE_DEV_SERVER_URL as string);
     window.webContents.openDevTools({ mode: "detach" });
