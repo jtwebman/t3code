@@ -48,7 +48,7 @@ function AlertDialogPopup({
   bottomStickOnMobile?: boolean;
 }) {
   return (
-    <AlertDialogPortal>
+    <AlertDialogPortal container={document.getElementById("app-content")}>
       <AlertDialogBackdrop />
       <AlertDialogViewport
         className={cn(bottomStickOnMobile && "max-sm:grid-rows-[1fr_auto] max-sm:p-0 max-sm:pt-12")}

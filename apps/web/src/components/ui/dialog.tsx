@@ -57,7 +57,7 @@ function DialogPopup({
   bottomStickOnMobile?: boolean;
 }) {
   return (
-    <DialogPortal>
+    <DialogPortal container={document.getElementById("app-content")}>
       <DialogBackdrop />
       <DialogViewport
         className={cn(bottomStickOnMobile && "max-sm:grid-rows-[1fr_auto] max-sm:p-0 max-sm:pt-12")}

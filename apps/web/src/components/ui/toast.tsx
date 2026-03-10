@@ -170,7 +170,7 @@ function Toasts({ position = "top-right" }: { position: ToastPosition }) {
   }, [toasts]);
 
   return (
-    <Toast.Portal data-slot="toast-portal">
+    <Toast.Portal data-slot="toast-portal" container={document.getElementById("app-content")}>
       <Toast.Viewport
         className={cn(
           "fixed z-50 mx-auto flex w-[calc(100%-var(--toast-inset)*2)] max-w-90 [--toast-header-offset:52px] [--toast-inset:--spacing(4)] sm:[--toast-inset:--spacing(8)]",
@@ -325,7 +325,7 @@ function AnchoredToasts() {
   const activeThreadId = useActiveThreadIdFromRoute();
 
   return (
-    <Toast.Portal data-slot="toast-portal-anchored">
+    <Toast.Portal data-slot="toast-portal-anchored" container={document.getElementById("app-content")}>
       <Toast.Viewport className="outline-none" data-slot="toast-viewport-anchored">
         {toasts
           .filter((toast) => shouldRenderForActiveThread(toast.data, activeThreadId))

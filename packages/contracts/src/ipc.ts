@@ -95,6 +95,7 @@ export interface DesktopUpdateActionResult {
 }
 
 export interface DesktopBridge {
+  isWsl: boolean;
   getWsUrl: () => string | null;
   pickFolder: () => Promise<string | null>;
   confirm: (message: string) => Promise<boolean>;

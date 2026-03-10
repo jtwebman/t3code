@@ -69,6 +69,7 @@ const APP_DISPLAY_NAME = isDevelopment ? "T3 Code (Dev)" : "T3 Code (Alpha)";
 const APP_USER_MODEL_ID = "com.t3tools.t3code";
 const USER_DATA_DIR_NAME = isDevelopment ? "t3code-dev" : "t3code";
 const LEGACY_USER_DATA_DIR_NAME = isDevelopment ? "T3 Code (Dev)" : "T3 Code (Alpha)";
+const IS_WSL = process.platform === "linux" && Boolean(process.env.WSL_DISTRO_NAME);
 const COMMIT_HASH_PATTERN = /^[0-9a-f]{7,40}$/i;
 const COMMIT_HASH_DISPLAY_LENGTH = 12;
 const LOG_DIR = Path.join(STATE_DIR, "logs");
@@ -1266,7 +1267,11 @@ function createWindow(): BrowserWindow {
     darkTheme: nativeTheme.shouldUseDarkColors,
     ...(process.platform === "darwin"
       ? { titleBarStyle: "hiddenInset" as const, trafficLightPosition: { x: 16, y: 18 } }
-      : { titleBarStyle: "hidden" as const, titleBarOverlay: titleBarOverlayColors() }),
+      : process.platform === "win32"
+        ? { titleBarStyle: "hidden" as const, titleBarOverlay: titleBarOverlayColors() }
+        : IS_WSL
+          ? { frame: false }
+          : {}),
     webPreferences: {
       preload: Path.join(__dirname, "preload.js"),
       contextIsolation: true,

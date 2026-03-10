@@ -1134,7 +1134,7 @@ export default function Sidebar() {
     <>
       {isElectron ? (
         <>
-          <SidebarHeader className={`drag-region h-[52px] flex-row items-center gap-2 px-4 py-0 ${isMacPlatform ? "pl-[90px]" : "pl-4"}`}>
+          <SidebarHeader className={`drag-region h-[52px] flex-row items-center gap-2 px-4 py-0 ${isMacPlatform(navigator.platform) ? "pl-[90px]" : "pl-4"}`}>
             {wordmark}
             {showDesktopUpdateButton && (
               <Tooltip>

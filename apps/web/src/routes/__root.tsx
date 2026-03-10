@@ -24,6 +24,7 @@ import { onServerConfigUpdated, onServerWelcome } from "../wsNativeApi";
 import { providerQueryKeys } from "../lib/providerReactQuery";
 import { projectQueryKeys } from "../lib/projectReactQuery";
 import { collectActiveTerminalThreadIds } from "../lib/terminalStateCleanup";
+import { isWslElectron, WslTitleBar } from "../components/WindowControls";
 
 export const Route = createRootRouteWithContext<{
   queryClient: QueryClient;
@@ -53,7 +54,12 @@ function RootRouteView() {
       <AnchoredToastProvider>
         <EventRouter />
         <DesktopProjectBootstrap />
-        <Outlet />
+        <div className="flex h-dvh flex-col overflow-hidden">
+          {isWslElectron && <WslTitleBar />}
+          <div id="app-content" className="relative min-h-0 flex-1 [contain:paint]">
+            <Outlet />
+          </div>
+        </div>
       </AnchoredToastProvider>
     </ToastProvider>
   );

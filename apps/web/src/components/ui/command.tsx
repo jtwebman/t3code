@@ -54,7 +54,7 @@ function CommandDialogViewport({ className, ...props }: CommandDialogPrimitive.V
 
 function CommandDialogPopup({ className, children, ...props }: CommandDialogPrimitive.Popup.Props) {
   return (
-    <CommandDialogPortal>
+    <CommandDialogPortal container={document.getElementById("app-content")}>
       <CommandDialogBackdrop />
       <CommandDialogViewport>
         <CommandDialogPrimitive.Popup

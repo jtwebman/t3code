@@ -15,8 +15,10 @@ const WINDOW_MINIMIZE_CHANNEL = "desktop:window-minimize";
 const WINDOW_MAXIMIZE_CHANNEL = "desktop:window-maximize";
 const WINDOW_CLOSE_CHANNEL = "desktop:window-close";
 const wsUrl = process.env.T3CODE_DESKTOP_WS_URL ?? null;
+const isWsl = process.platform === "linux" && Boolean(process.env.WSL_DISTRO_NAME);
 
 contextBridge.exposeInMainWorld("desktopBridge", {
+  isWsl,
   getWsUrl: () => wsUrl,
   pickFolder: () => ipcRenderer.invoke(PICK_FOLDER_CHANNEL),
   confirm: (message) => ipcRenderer.invoke(CONFIRM_CHANNEL, message),

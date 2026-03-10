@@ -72,7 +72,7 @@ function SheetPopup({
   variant?: "default" | "inset";
 }) {
   return (
-    <SheetPortal keepMounted={keepMounted}>
+    <SheetPortal keepMounted={keepMounted} container={document.getElementById("app-content")}>
       <SheetBackdrop />
       <SheetViewport side={side} variant={variant}>
         <SheetPrimitive.Popup
